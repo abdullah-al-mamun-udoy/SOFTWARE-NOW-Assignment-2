@@ -4,23 +4,100 @@ import numpy as np
 
 
 # Full path of my temperatures folder.
+# path of my output folder
 FOLDER_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/temperatures"
+OUTPUT_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)"
 
 # List all CSV files in the folder
 csv_files = [file for file in os.listdir(FOLDER_PATH) if file.endswith(".csv")]
 
+#all_dataframes = []
 all_data = []
 
 for file in csv_files:
     file_path = os.path.join(FOLDER_PATH, file)
+    
+    # Read each CSV file
+    df = pd.read_csv(file_path)
+    all_data.append(df)
 
-    # Read one CSV file into a pandas DataFrame
-    data_frame = pd.read_csv(file_path)
-
-    # Store the DataFrame in a list
-    all_data.append(data_frame)
-
-# Combine all DataFrames into one DataFrame
+# Combine all CSVs
 combined_data = pd.concat(all_data, ignore_index=True)
 
 
+# Month columns in CSV
+month_columns = ["January","February","March","April","May","June","July","August",
+                 "September","October","November","December"]
+
+# Melt the DataFrame: one row per station per month
+long_data = pd.melt(
+    combined_data,
+    id_vars=["STATION_NAME", "STN_ID", "LAT", "LON"],
+    value_vars=month_columns,
+    var_name="Month",
+    value_name="Temperature"
+)
+
+
+# Convert month names to numbers
+month_to_num = {
+    "January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
+    "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12
+}
+
+long_data["Month_Num"] = long_data["Month"].map(month_to_num)
+
+
+# Assign Australian seasons
+def get_season(month):
+    if month in [12,1,2]:
+        return "Summer"
+    elif month in [3,4,5]:
+        return "Autumn"
+    elif month in [6,7,8]:
+        return "Winter"
+    else:
+        return "Spring"
+
+long_data["Season"] = long_data["Month_Num"].apply(get_season)
+
+
+# Convert Temperature to numeric
+long_data["Temperature"] = pd.to_numeric(long_data["Temperature"], errors="coerce")
+
+
+# Seasonal average temperature
+seasonal_avg = long_data.groupby("Season")["Temperature"].mean()
+
+with open(f"{OUTPUT_PATH}/average_temp.txt", "w") as file:
+    for season, temp in seasonal_avg.items():
+        file.write(f"{season}: {temp:.1f}°C\n")
+
+# Station temperature range
+station_stats = long_data.groupby("STATION_NAME")["Temperature"].agg(["max", "min"])
+station_stats["range"] = station_stats["max"] - station_stats["min"]
+
+max_range = station_stats["range"].max()
+largest_range_stations = station_stats[station_stats["range"] == max_range]
+
+with open(f"{OUTPUT_PATH}/largest_temp_range_station.txt", "w") as file:
+    for station, row in largest_range_stations.iterrows():
+        file.write(
+            f"Station {station}: Range {row['range']:.1f}°C "
+            f"(Max: {row['max']:.1f}°C, Min: {row['min']:.1f}°C)\n"
+        )
+
+# Temperature stability (standard deviation)
+station_std = long_data.groupby("STATION_NAME")["Temperature"].std()
+
+min_std = station_std.min()
+max_std = station_std.max()
+
+most_stable = station_std[station_std == min_std]
+most_variable = station_std[station_std == max_std]
+
+with open(f"{OUTPUT_PATH}/temperature_stability_stations.txt", "w") as file:
+    for station, std in most_stable.items():
+        file.write(f"Most Stable: Station {station}: StdDev {std:.1f}°C\n")
+    for station, std in most_variable.items():
+        file.write(f"Most Variable: Station {station}: StdDev {std:.1f}°C\n")
