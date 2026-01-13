@@ -101,3 +101,4 @@ with open(f"{OUTPUT_PATH}/temperature_stability_stations.txt", "w") as file:
         file.write(f"Most Stable: Station {station}: StdDev {std:.1f}°C\n")
     for station, std in most_variable.items():
         file.write(f"Most Variable: Station {station}: StdDev {std:.1f}°C\n")
+        
