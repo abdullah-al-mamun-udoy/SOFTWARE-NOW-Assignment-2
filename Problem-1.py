@@ -141,17 +141,66 @@ def encrypt_text(shift1, shift2):
 
 
 
+def decrypt_text(direction_array, shift1, shift2):
+    with open(ENCRYPTED_PATH, "r", encoding="utf-8") as file:
+        encrypted_text = file.read()
+
+    decrypted = []
+
+    for i, ch in enumerate(encrypted_text):
+        direction = direction_array[i]
+
+        if direction is None:
+            decrypted.append(ch)
+            continue
+
+        if ch.islower():
+            if direction == 1:
+                shift = shift1 * shift2
+                new_char = chr((ord(ch) - ord('a') - shift) % 26 + ord('a'))
+            else:
+                shift = shift1 + shift2
+                new_char = chr((ord(ch) - ord('a') + shift) % 26 + ord('a'))
+            decrypted.append(new_char)
+
+        elif ch.isupper():
+            if direction == 1:
+                shift = shift2 ** 2
+                new_char = chr((ord(ch) - ord('A') - shift) % 26 + ord('A'))
+            else:
+                shift = shift1
+                new_char = chr((ord(ch) - ord('A') + shift) % 26 + ord('A'))
+            decrypted.append(new_char)
+
+    return "".join(decrypted)
+
+
+def verify_decryption(raw_text, decrypted_text):
+    return raw_text == decrypted_text
+
+
+
 #Main method
 shift1 = int(input("Enter shift1: "))
 shift2 = int(input("Enter shift2: "))
 
 raw_text, encrypted_text, direction_array = encrypt_text(shift1,shift2)
+decrypted_text = decrypt_text(direction_array, shift1, shift2)
 
-print("\n------ RAW TEXT ------")
-print(raw_text)
+# print("\n------ RAW TEXT ------")
+# print(raw_text)
 
-print("\n--- ENCRYPTED TEXT ---")
-print(encrypted_text)
+# print("\n--- ENCRYPTED TEXT ---")
+# print(encrypted_text)
+
+# print("\n--- DECRYPTED TEXT ---")
+# print(decrypted_text)
+
+if verify_decryption(raw_text, decrypted_text):
+    print("\n Decryption successful.Text matches original.")
+else:
+    print("\n Decryption failed.")
+
 
 
 
