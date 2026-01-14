@@ -99,12 +99,61 @@
 RAW_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/raw_text.txt"
 ENCRYPTED_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/encrypted_text.txt"
 
+def encrypt_text(shift1, shift2):
+    with open(RAW_PATH, "r", encoding = "utf-8") as file:
+        raw_text = file.read()
+    encrypted = []
+    direction_array = [] #1- forward and 0- for backward
+
+    for ch in raw_text:
+        if ch.islower():
+            if 'a' <= ch <= 'm':
+                shift = shift1 * shift2
+                new_char = chr((ord(ch) - ord('a') + shift) % 26 + ord('a'))
+                direction_array.append(1)
+            elif 'n' <= ch <= 'z':
+                shift = shift1 + shift2
+                new_char = chr((ord(ch) - ord('a') - shift) % 26 + ord('a'))
+                direction_array.append(0)
+            encrypted.append(new_char)
+
+        elif ch.isupper():
+            if 'A' <= ch <= 'M':
+                shift = shift1
+                new_char = chr((ord(ch) - ord('A') - shift) % 26 + ord('A'))
+                direction_array.append(0)
+            elif 'N' <= ch <= 'Z':
+                shift = shift2 ** 2
+                new_char = chr((ord(ch) - ord('A') + shift) % 26 + ord('A'))
+                direction_array.append(1)
+            encrypted.append(new_char)
+
+        else:
+            encrypted.append(ch)
+            direction_array.append(None)
+
+    encrypted_text = "".join(encrypted)
+
+    with open(ENCRYPTED_PATH, "w", encoding="utf-8") as file:
+        file.write(encrypted_text)
+
+    return raw_text, encrypted_text, direction_array
+
+
 
 #Main method
 shift1 = int(input("Enter shift1: "))
 shift2 = int(input("Enter shift2: "))
 
 raw_text, encrypted_text, direction_array = encrypt_text(shift1,shift2)
+
+print("\n------ RAW TEXT ------")
+print(raw_text)
+
+print("\n--- ENCRYPTED TEXT ---")
+print(encrypted_text)
+
+
 
 
 
