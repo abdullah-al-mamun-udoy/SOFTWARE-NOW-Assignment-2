@@ -107,9 +107,9 @@ def temperature_stability(data):
         file.write(f"Most Variable: Station {s}: StdDev {v:.1f}°C\n")
     file.close()
 
-seasonal_average(long_data)
-largest_range(long_data)
-temperature_stability(long_data)
+seasonal_average(data_long)
+largest_range(data_long)
+temperature_stability(data_long)
 
 # Problem is solved
 # Thanks for this interactive problem
