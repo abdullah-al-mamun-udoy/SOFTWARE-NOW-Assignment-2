@@ -98,6 +98,8 @@
 
 RAW_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/raw_text.txt"
 ENCRYPTED_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/encrypted_text.txt"
+DECRYPTED_PATH = "/Users/mamunudoy/Downloads/Assignment 2 (1)/decrypted_text.txt"
+
 
 def encrypt_text(shift1, shift2):
     with open(RAW_PATH, "r", encoding = "utf-8") as file:
@@ -172,7 +174,12 @@ def decrypt_text(direction_array, shift1, shift2):
                 new_char = chr((ord(ch) - ord('A') + shift) % 26 + ord('A'))
             decrypted.append(new_char)
 
-    return "".join(decrypted)
+    decrypted_text = "".join(decrypted)
+
+    with open(DECRYPTED_PATH, "w", encoding="utf-8") as file:
+        file.write(decrypted_text)
+
+    return decrypted_text
 
 
 def verify_decryption(raw_text, decrypted_text):
